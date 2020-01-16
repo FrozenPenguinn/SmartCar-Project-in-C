@@ -116,11 +116,28 @@ void run(void)
         motor_duty(0);
 }
 
+// 出库函数
+void out(void)
+{
+    // 试探车道中心线
+    motor_duty(-25);
+    steer_angle(0);
+    if ((arr_sum[2] > 2000) && (arr_sum[3] > 2000) && (abs(arr_sum[2] - arr_sum[3] < 300))) // 全电磁传感器同步触碰
+    {
+        motor_duty(25);
+        UserInterupt100ms();
+        motor_duty(25);
+        steer_angle(-60);
+        UserInterupt1000ms();
+    }
+}
+
 /*****************************主函数***********************************/
 //CPU0主函数，置于循环中用户主要逻辑计算区
 void UserCpu0Main(void)
 {
     VADC_init();
+    out();
     while (1)
     {
         // 蓝牙起停指令
