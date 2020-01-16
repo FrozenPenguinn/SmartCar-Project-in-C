@@ -97,12 +97,13 @@ void run(void)
         mydutyx = 45 - (myangleI / 3);
         motor_duty(-mydutyx);
         steer_angle(myangleI);
-        if ((arr_sum[4] > arr_sum[3] + 1000) && (arr_sum[4] > arr_sum[1] + 2000))
+        // 入大圆弯道
+        if ((arr_sum[4] > arr_sum[3] + 500) && (arr_sum[4] > arr_sum[1] + 2000))
         {
             circle_counter ++;
             if (circle_counter == 2)
             {
-                steer_angle(-myanleI);
+                steer_angle(-60);
                 UserInterupt100ms();
             }
         }
@@ -122,10 +123,15 @@ void UserCpu0Main(void)
     VADC_init();
     while (1)
     {
+        // 蓝牙起停指令
         ReadWord = Bluetooth_Read_Data();
         if (ReadWord != 0)
             ctldata = ReadWord;
         if (ctldata == 'O')
+            for (i = 0; i < 2; i ++)
+            {
+                UserInterupt1000ms();
+            }
             UStop = 1;
         else
             UStop = 0;
