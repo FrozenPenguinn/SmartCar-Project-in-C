@@ -14,12 +14,12 @@ IfxVadc_Adc_GroupConfig adcGroupConfig;
 // create channel config
 IfxVadc_Adc_ChannelConfig adcChannelConfig[9];
 IfxVadc_Adc_Channel adcChannel[9];
-unsigned int  VADCresult[9];
+unsigned int  VADC_result[9];
 
 /*****************************电磁采集*********************************/
 //磁场数据采样
 
-void VADC_init(void)
+void VADC_Init(void)
 {
 	// create configuration
 	IfxVadc_Adc_initModuleConfig(&adcConfig, &MODULE_VADC);
@@ -62,7 +62,7 @@ void VADC_init(void)
 }
 
 
-void VADCresult_run(void)
+void VADC_Result_Run(void)
 {
     // wait for valid result
     Ifx_VADC_RES conversionResult;
@@ -70,11 +70,11 @@ void VADCresult_run(void)
     IfxVadc_Adc_startScan(&adcGroup);
     // check results
     int chnIx;
-    for(chnIx=0; chnIx<9; chnIx++) {
+    for(chnIx = 0; chnIx < 9; chnIx++) {
         do {
             conversionResult = IfxVadc_Adc_getResult(&adcChannel[chnIx]);
         } while( !conversionResult.B.VF );
-        VADCresult[chnIx]=conversionResult.B.RESULT;
+        VADC_result[chnIx] = conversionResult.B.RESULT;
     }
 }
 
