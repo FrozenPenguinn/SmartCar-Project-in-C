@@ -19,6 +19,7 @@ int timecounter10 = 0;
 float distance;
 double myangleOr, anglex, angle_mag, length_err;
 int circle_counter = 0;
+int out_mag_count = 0;
 
 /*****************************底层控制*********************************/
 //电机速度
@@ -98,7 +99,7 @@ void run(void)
         motor_duty(-mydutyx);
         steer_angle(myangleI);
         // 入大圆弯道
-        if ((arr_sum[4] > arr_sum[3] + 500) && (arr_sum[4] > arr_sum[1] + 2000))
+        if (abs(arr_sum[4] - (arr_sum[3])) > 500 && abs(arr_sum[4] - (arr_sum[1])) > 2000)
         {
             circle_counter ++;
             if (circle_counter == 2)
@@ -107,29 +108,9 @@ void run(void)
                 UserInterupt100ms();
             }
         }
-        for (i = 0; i < 3; i++)
-        {
-            UserInterupt10ms(); //单次执行时间为30ms
-        }
     }
     else
         motor_duty(0);
-}
-
-// 出库函数
-void out(void)
-{
-    // 试探车道中心线
-    motor_duty(-25);
-    steer_angle(0);
-    if ((arr_sum[2] > 2000) && (arr_sum[3] > 2000) && (abs(arr_sum[2] - arr_sum[3] < 300))) // 全电磁传感器同步触碰
-    {
-        motor_duty(25);
-        UserInterupt100ms();
-        motor_duty(25);
-        steer_angle(-60);
-        UserInterupt1000ms();
-    }
 }
 
 /*****************************主函数***********************************/
@@ -137,7 +118,9 @@ void out(void)
 void UserCpu0Main(void)
 {
     VADC_init();
-    out();
+    steer_angle(0);
+    motor_duty(-30);
+    UserInteruptIO();
     while (1)
     {
         // 蓝牙起停指令
@@ -152,6 +135,8 @@ void UserCpu0Main(void)
             UStop = 1;
         else
             UStop = 0;
+            motor_duty(0);
+            steer_angle(0);
         run();
     }
 }
@@ -186,4 +171,15 @@ uint32 UserInterupt1000ms(void)
 void UserInteruptIO(void)
 {
     IfxPort_togglePin(LED1);
+}
+
+// 出库函数，中断200ms
+void UserInteruptIO(void)
+{
+    out_mag_count ++;
+    steer_angle(-110);
+    for (i = 0; i < 2; i ++)
+    {
+        UserInterupt100ms();
+    }
 }
